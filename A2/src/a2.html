@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html ng-app="app">
+<head>
+  <meta charset="utf-8">
+  <title>COMP 426, Fall 2014, A1</title>
+  <link rel="stylesheet" type="text/css" href="a2.css">
+</head>
+
+<body>
+  <div class="container" ng-controller="container">
+    <div class="control">
+      <table>
+        <tr>
+          <td><input type="range" min="0" max={{params.gridLength.max}} value={{params.gridLength.value}}></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><input type="range" min="0" max="10"></td>
+          <td></td>
+        </tr>
+      </table>
+    </div>
+    <div class="display">
+
+    </div>
+  </div>
+
+
+
+
+<!--
+Requirements
+Interface for
+- changeable square using input/range
+  - 20x20 - 200x200
+- re-draw speed from 0ms to 1000ms
+- fill color that indicate
+  - current state: dead/alive
+  - ever been alive
+- automation parameter
+  - neighbor radius = 1
+  - l=2 lonliness
+  - o=3, overpopulation
+  - gmin=3 and gmax=3
+  - enforce threshhold
+- Two states
+  - button for swtiching states
+  - State Stop
+    - Left = flip the cell
+    - Shift+left = force alive
+    - Ctrl+left = force dead
+    - button to advance 1 step
+    - button to reset cell
+    - button to randomly fill the cells
+  - State Run
+
+
+ -->
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
+  <script src="a2.js"></script>
+</body>
+</html>

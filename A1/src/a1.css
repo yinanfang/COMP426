@@ -1,0 +1,45 @@
+body {
+  background: #FEFEF0;
+}
+
+#demographic > h1 {
+  font-family: 'Signika', sans-serif;
+  text-align: center;
+  font-weight: bold;
+}
+
+#demographic, #publications, #teaching, #research {
+  margin: 1% auto;
+  padding: 2%;
+  width: 75%;
+  border:3px solid #8AC007;
+}
+
+body div h2, body div h3, body div h4 {
+  font-family: 'Bitstream Vera Sans Mono', monospace;
+}
+
+body div h1:hover, body div h2:hover, body div h3:hover, body div h4:hover {
+  text-shadow: 0 0 1px #000000;
+}
+
+#contact div{
+  font-style: italic;
+}
+
+.education, .experience, .project, .course {
+  margin: 1%
+}
+
+.jobtitle, .course .title, .citation .authors {
+  font-weight: bold;
+}
+
+.citation .title {
+  font-style: italic;
+}
+
+img {
+  display: block;
+  margin: auto;
+}
