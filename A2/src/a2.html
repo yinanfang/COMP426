@@ -7,22 +7,28 @@
 </head>
 
 <body>
+  <div class="header"></div>
   <div class="container" ng-controller="container">
     <div class="control">
       <table>
-        <tr>
-          <td><input type="range" min="0" max={{params.gridLength.max}} value={{params.gridLength.value}}></td>
-          <td></td>
-        </tr>
-        <tr>
-          <td><input type="range" min="0" max="10"></td>
+        <tr ng-repeat="param in params">
+          <td><input type="range" min={{param.min}} max={{param.max}} value={{param.value}}></td>
           <td></td>
         </tr>
       </table>
     </div>
-    <div class="display">
-
+    <div displayTable class="display">
+      <table>
+        <tr ng-repeat="i in range(params.gridLength.value)">
+          <td ng-repeat="j in range(params.gridLength.value)" row={{i}} col={{j}}>
+            ({{i}}, {{j}})
+          </td>
+        </tr>
+      </table>
     </div>
+  </div>
+  <div class="footer">
+    footer
   </div>
 
 
