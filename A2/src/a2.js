@@ -35,51 +35,74 @@ var renderControl = function(controlParameters, isDefault) {
     html += '<td></td>';
     html += '</tr>';
     html += '<tr>';
-    html += '<td><input type="range" name="'+param.name+'" min="'+param.min+'" max="'+param.max+'" value="'+paramValue+'"></td>';
+    if (param.type=='range') {
+      html += '<td><input type="range" name="'+param.name+'" min="'+param.min+'" max="'+param.max+'" value="'+paramValue+'"></td>';
+    } else if (param.type=='dropdown') {
+      html += '<td><select name="'+param.name+'">';
+      for (var optionKey in param.options) {
+        html += '<option>'+param.options[optionKey]+'</option>';
+      }
+      html += '</select></td>';
+    }
     html += '<td>'+paramValue+'</td>';
     html += '<tr>';
     control.append(html);
   });
 
-  // Add general onClick listeners to control pannel
-  $('.control input').on('mousemove mouseup click', function(event) {
-    $(this).parent().next().html($(this).val());
+  $('.control').on('input change', function(event) {
+    // console.log($(this));
+    // console.log(event.target.nodeName);
+    handlerForControl(event.target);
+  });
+  $('.control button').click(function(event) {
+    // console.log($(this));
+    // console.log(event.target.nodeName);
+    handlerForControl(event.target);
+  });
+
+};
+
+var handlerForControl = function(target) {
+  console.log(target);
+  if (target.nodeName=='INPUT') {
+    $(target).parent().next().html($(target).val());
 
     // Update controlParameters
-    var newValue = parseInt($(this).val(), 10);
-    var param = $(this).attr('name');
-    controlParameters[param].currentValue = newValue;
+    var newValue = parseInt($(target).val(), 10);
+    var updatedParam = $(target).attr('name');
+    controlParameters[updatedParam].currentValue = newValue;
 
-    // Need to stop everything and re-render grid if the gridLength is changed
-    if (param=='gridLength') {
-      stopRunning();
-      removeGrid();
-      renderGrid(newValue, true);
-      console.log('finished render');
-      return;
+    if (isValidControlParameter()) {
+      updateGameEngine(updatedParam, newValue);
     }
+  }
+};
+
+var isValidControlParameter = function() {
+  return true;
+};
+
+var updateGameEngine = function(updatedParam, newValue) {
+  // Need to stop everything and re-render grid if the gridLength is changed
+  if (updatedParam=='gridLength') {
+    stopRunning();
+    removeGrid();
+    renderGrid(newValue, true);
+    console.log('finished render');
+    return;
+  }
 
     //
-    if (stateMachine.isRunning) {
-      // Stop Running
+  if (gameEngine.isRunning) {
+    // Stop Running
 
-      // Update value
+    // Update value
 
-      // Start running
+    // Start running
 
-    } else if (!stateMachine.isRunning) {
-      // Update value
-
-    }
-  });
-};
-
-var handlerForControl = function() {
-
-};
-
-var updateControlParameters = function(key, value) {
-
+  } else if (!gameEngine.isRunning) {
+    // Update value
+  }
 };
 
 var stopRunning = function() {
@@ -117,18 +140,15 @@ var renderGrid = function(gridLength, isDefault) {
 // Data
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-var controlButtons;
-
-var stateMachine = {
+var gameEngine = {
   isRunning: true,
 };
-
-var gridParameters;
 
 var controlParameters = {
   gridLength: {
     name: 'gridLength',
     nameDisplay: 'Grid Length',
+    type: 'range',
     defaultValue: 20,
     currentValue: 20,
     min: 20,
@@ -137,6 +157,7 @@ var controlParameters = {
   renderInterval: {
     name: 'renderInterval',
     nameDisplay: 'Render Speed',
+    type: 'range',
     defaultValue: 10,
     currentValue: 10,
     min: 0,
@@ -145,6 +166,7 @@ var controlParameters = {
   radius: {
     name: 'radius',
     nameDisplay: 'Neighbor Radius',
+    type: 'range',
     defaultValue: 2,
     currentValue: 2,
     min: 1,
@@ -153,6 +175,7 @@ var controlParameters = {
   lonliness: {
     name: 'lonliness',
     nameDisplay: 'Cell Lonliness',
+    type: 'range',
     defaultValue: 0,
     currentValue: 0,
     min: 0,
@@ -161,6 +184,7 @@ var controlParameters = {
   overpolulation: {
     name: 'overpolulation',
     nameDisplay: 'Overpopulation Threshhold',
+    type: 'range',
     defaultValue: 7,
     currentValue: 7,
     min: 0,
@@ -169,6 +193,7 @@ var controlParameters = {
   gmin: {
     name: 'gmin',
     nameDisplay: 'Gmin',
+    type: 'range',
     defaultValue: 2,
     currentValue: 2,
     min: 0,
@@ -177,10 +202,23 @@ var controlParameters = {
   gmax: {
     name: 'gmax',
     nameDisplay: 'Gmax',
+    type: 'range',
     defaultValue: 3,
     currentValue: 3,
     min: 0,
     max: 10,
+  },
+  edgeNeighbor: {
+    name: 'edgeNeighbor',
+    nameDisplay: 'Edge Neighbor',
+    type: 'dropdown',
+    defaultValue: 'dead',
+    currentValue: 'dead',
+    options: {
+      1: 'dead',
+      2: 'live',
+      3: 'toroidal',
+    },
   },
 };
 
