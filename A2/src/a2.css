@@ -24,13 +24,13 @@ html, body {
   min-height: 100%;
 }
 .control {
-  width: 15%;
+  width: 16%;
   text-align: center;
   background: white;
 }
 
 .grid {
-  width: 85%;
+  width: 84%;
   background: white;
 }
 

@@ -4,6 +4,10 @@ $(document).ready(function(){
 
   renderDefaultControlAndGrid();
 
+  // debug
+  fillGridWithRandomValue();
+  autoStep();
+
 });
 
 var renderDefaultControlAndGrid = function() {
@@ -65,16 +69,24 @@ var renderControl = function(controlParameters, isDefault) {
 var handlerForControl = function(target) {
   console.log(target);
   if (target.nodeName=='INPUT') {
-    $(target).parent().next().html($(target).val());
+    updateControlParameters(target);
+  } else if (target.nodeName=='SELECT') {
+    updateControlParameters(target);
+  } else if (target.nodeName=='BUTTON') {
+    updateGameEngine($(target).attr('name'), 1);
+  }
+};
 
-    // Update controlParameters
-    var newValue = parseInt($(target).val(), 10);
-    var updatedParam = $(target).attr('name');
-    controlParameters[updatedParam].currentValue = newValue;
+var updateControlParameters = function(target) {
+  $(target).parent().next().html($(target).val());
 
-    if (isValidControlParameter()) {
-      updateGameEngine(updatedParam, newValue);
-    }
+  // Update controlParameters
+  var newValue = (target.nodeName=='INPUT') ? parseInt($(target).val(), 10) : $(target).val();
+  var updatedParam = $(target).attr('name');
+  controlParameters[updatedParam].currentValue = newValue;
+  // Update Game engine if parameters are valid
+  if (isValidControlParameter()) {
+    updateGameEngine(updatedParam, newValue);
   }
 };
 
@@ -83,26 +95,36 @@ var isValidControlParameter = function() {
 };
 
 var updateGameEngine = function(updatedParam, newValue) {
-  // Need to stop everything and re-render grid if the gridLength is changed
-  if (updatedParam=='gridLength') {
-    stopRunning();
-    removeGrid();
-    renderGrid(newValue, true);
-    console.log('finished render');
-    return;
-  }
-
-    //
+  // Stop if needed
   if (gameEngine.isRunning) {
-    // Stop Running
-
-    // Update value
-
-    // Start running
-
-  } else if (!gameEngine.isRunning) {
-    // Update value
+    stopRunning;
   }
+
+  // Update value
+  // Need to stop everything and re-render grid if the gridLength is changed
+  console.log('updatedParam: '+updatedParam+'; newValue: '+newValue);
+  switch(updatedParam) {
+    case 'gridLength':
+      stopRunning();
+      removeGrid();
+      renderGrid(newValue, true);
+      console.log('finished render');
+      break;
+    case 'random':
+      fillGridWithRandomValue();
+      break;
+    default:
+      console.log('Unrecognized updatedParam!!');
+  }
+
+  // Re-start if needed
+  if (gameEngine.isRunning) {
+    autoStep();
+  }
+};
+
+var fillGridWithRandomValue = function() {
+
 };
 
 var stopRunning = function() {
@@ -142,6 +164,10 @@ var renderGrid = function(gridLength, isDefault) {
 
 var gameEngine = {
   isRunning: true,
+  gridBuffer: {
+    prev: 1,
+    cur: 2,
+  },
 };
 
 var controlParameters = {
