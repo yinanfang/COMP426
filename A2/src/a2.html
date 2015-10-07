@@ -11,28 +11,23 @@
   <div class="container" ng-controller="container">
     <div class="control">
       <table>
-        <tr ng-repeat="param in params">
-          <td><input type="range" min={{param.min}} max={{param.max}} value={{param.value}}></td>
-          <td></td>
-        </tr>
+        <tbody></tbody>
       </table>
+      <br><br>
+      <button type="button">Start</button>
+      <button type="button">Stop</button>
+      <button type="button">Step</button>
+      <button type="button">Reset</button>
+      <button type="button">Random</button>
     </div>
-    <div displayTable class="display">
+    <div displayTable class="grid">
       <table>
-        <tr ng-repeat="i in range(params.gridLength.value)">
-          <td ng-repeat="j in range(params.gridLength.value)" row={{i}} col={{j}}>
-            ({{i}}, {{j}})
-          </td>
-        </tr>
+        <tbody></tbody>
       </table>
     </div>
   </div>
   <div class="footer">
-    footer
   </div>
-
-
-
 
 <!--
 Requirements
@@ -60,11 +55,11 @@ Interface for
     - button to randomly fill the cells
   - State Run
 
-
+Reference:
+- http://wwwp.cs.unc.edu/Courses/comp426-f15/kmp/fall14-a2/minesweeper.js
  -->
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
   <script src="a2.js"></script>
 </body>
 </html>

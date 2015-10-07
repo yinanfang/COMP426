@@ -1,48 +1,45 @@
 html, body {
   margin: 0;
   height: 100%;
-  background: grey;
+  background: #CFCFC4;
 }
 
 .header {
-  height: 15%;
+  height: 5%;
 }
 
 .footer {
-  height: 15%;
+  height: 5%;
 }
 
 .container {
   background: red;
-  width: 1024px;
-  height: 70%;
+  width: 1240px;
+  height: 90%;
   margin: 0 auto;
 }
 
 .container div{
   float: left;
+  min-height: 100%;
 }
 .control {
-  width: 250px;
+  width: 15%;
+  text-align: center;
   background: white;
 }
 
-.display {
-  width: 774px;
-  height: 100%;
+.grid {
+  width: 85%;
   background: white;
 }
 
-.display table {
-  /*height: 100%;*/
+.grid table {
   margin: 0 auto;
 }
 
-.display tr {
-  background: red;
-  height: 1%;
-}
-
-.display td {
-  height: 1%;
+.never {
+  /*background: #AEC6CF; off pastel blue*/
+  /*background: #DBF0F7; ever*/
+  background: #F3F3F3;
 }
