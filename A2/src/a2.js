@@ -159,10 +159,15 @@ var resetAll = function() {
     element.val(param.defaultValue);
     element.parent().next().html(param.defaultValue);
   });
-  gameEngine = initGameEngine(controlParameters.gridLength.defaultValue);
+  var gridLength = controlParameters.gridLength.defaultValue;
+  var wasRunningBeforeReset = gameEngine.isRunning;
+  console.log('wasRunningBeforeReset'+wasRunningBeforeReset);
+  gameEngine = initGameEngine(gridLength);
+  gameEngine.isRunning = wasRunningBeforeReset;
+  console.log('after'+gameEngine.isRunning);
 
   // Reset UI
-
+  renderGrid(gridLength, true);
 };
 
 var renderGrid = function(gridLength, isDefault) {
@@ -194,7 +199,7 @@ var fillGridWithRandomValue = function() {
       // gameEngine.gridBuffer.cur[i][j] = alive;
     }
   }
-  console.log(JSON.stringify(gameEngine.gridBuffer.cur));
+  // console.log(JSON.stringify(gameEngine.gridBuffer.cur));
 };
 
 var randomNumberFor1Or0 = function() {
@@ -204,6 +209,7 @@ var randomNumberFor1Or0 = function() {
 var startAutoStep = function() {
   stopRunning();
   console.log('startAutoStep with controlParameters: ');
+  gameEngine.isRunning = true;
   console.log(controlParameters);
   gameEngine.autoStep =  setInterval(function() {
     oneStep();
@@ -218,8 +224,8 @@ var oneStep = function() {
 
   // Copy the matrix cur to prev
   bufferPre = $.extend(true, [], bufferCur);
-  console.log('loging bufferPre');
-  console.log(JSON.stringify(bufferPre));
+  // console.log('loging bufferPre');
+  // console.log(JSON.stringify(bufferPre));
 
   // Update cur and ever according to prev
   for (var i = 0; i < matrixLength; i++) {
@@ -228,8 +234,8 @@ var oneStep = function() {
       setCellState(i, j, isAlive);
     }
   }
-  console.log(JSON.stringify(gameEngine.gridBuffer.cur));
-  console.log(JSON.stringify(gameEngine.gridBuffer.ever));
+  // console.log(JSON.stringify(gameEngine.gridBuffer.cur));
+  // console.log(JSON.stringify(gameEngine.gridBuffer.ever));
 };
 
 var toggleCellState = function(i, j) {
@@ -243,6 +249,8 @@ var setCellState = function(i, j, isAlive) {
 
   if (isAlive) {
     gameEngine.gridBuffer.ever[i][j] = isAlive;
+  }
+  if (!isAlive) {
     addEverShad(i, j);
   }
 };
@@ -251,15 +259,24 @@ var addOnOffBackgroundByState = function(i, j, isAlive) {
   // console.log('addOnOffBackgroundByState'+isAlive);
   var element = $('.grid td[row="'+i+'"][col="'+j+'"]');
   if (isAlive) {
+    element.addClass('on');
     element.html('g');
   } else {
+    element.removeClass('on');
     element.html('n');
   }
 };
 
 var addEverShad = function(i, j) {
-  if (gameEngine.gridBuffer.ever[i][j]==0) {
-    // Add shade
+  // Currently dead but lived in the past
+  if (gameEngine.gridBuffer.ever[i][j]==1 && gameEngine.gridBuffer.cur[i][j]==0) {
+    // console.log('adding ever');
+    var element = $('.grid td[row="'+i+'"][col="'+j+'"]');
+    element.html('e');
+    element.addClass('ever');
+    // console.log('EVER: i=' +i+' ; j='+j);
+  } else {
+    // console.log('never: i=' +i+' ; j='+j);
   }
 };
 
