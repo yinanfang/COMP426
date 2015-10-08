@@ -121,10 +121,8 @@ var updateGameEngine = function(updatedParam, newValue) {
     case 'overpolulation':
     case 'gmin':
     case 'gmax':
-      controlParameters[updatedParam].currentValue = newValue;
-      break;
     case 'edgeNeighbor':
-      fillEdgesOfBuffer(gameEngine.gridBuffer.cur);
+      controlParameters[updatedParam].currentValue = newValue;
       break;
     case 'start':
       startAutoStep();
@@ -136,9 +134,9 @@ var updateGameEngine = function(updatedParam, newValue) {
     case 'step':
       oneStep();
       break;
-    // case 'reset':
-    //   resetAll();
-    //   break;
+    case 'reset':
+      resetAll();
+      break;
     case 'random':
       fillGridWithRandomValue();
       break;
@@ -153,17 +151,29 @@ var updateGameEngine = function(updatedParam, newValue) {
   }
 };
 
+var resetAll = function() {
+  $.each(controlParameters, function(key1, param) {
+    param.currentValue = param.defaultValue;
+    // console.log($('.control[name="'+param.name+'"]'));
+    var element = $('input[name='+param.name+']');
+    element.val(param.defaultValue);
+    element.parent().next().html(param.defaultValue);
+  });
+  gameEngine = initGameEngine(controlParameters.gridLength.defaultValue);
+};
+
 var renderGrid = function(gridLength, isDefault) {
   // Update gameEngine variable;
+  console.log('Rendering grid with gameEngine');
   console.log(gameEngine);
 
   // Update UI
   $('.grid tbody').empty();
   var grid = $('.grid tbody');
   var html;
-  for (var i = 1; i < gridLength+1; i++) {
+  for (var i = 0; i < gridLength; i++) {
     html += '<tr>';
-    for (var j = 1; j < gridLength+1; j++) {
+    for (var j = 0; j < gridLength; j++) {
       // check isDefault -> class never, on?
       html += '<td class="never" row="'+i+'" col="'+j+'"></td>';
     }
@@ -173,11 +183,13 @@ var renderGrid = function(gridLength, isDefault) {
 };
 
 var fillGridWithRandomValue = function() {
-  for (var i = 1; i <= controlParameters.gridLength.currentValue; i++) {
-    for (var j = 1; j <= controlParameters.gridLength.currentValue; j++) {
+  console.log('fillGridWithRandomValue');
+  for (var i = 0; i < controlParameters.gridLength.currentValue; i++) {
+    for (var j = 0; j < controlParameters.gridLength.currentValue; j++) {
       gameEngine.gridBuffer.cur[i][j] = randomNumberFor1Or0();
     }
   }
+  console.log(JSON.stringify(gameEngine.gridBuffer.cur));
 };
 
 var randomNumberFor1Or0 = function() {
@@ -194,48 +206,95 @@ var startAutoStep = function() {
 };
 
 var oneStep = function() {
-  // console.log(JSON.stringify(gameEngine.gridBuffer.cur));
-  if (controlParameters.edgeNeighbor.currentValue=='toroidal') {
-    fillEdgesOfBuffer(gameEngine.gridBuffer.cur);
+  var bufferEver = gameEngine.gridBuffer.ever;
+  var bufferPre = gameEngine.gridBuffer.pre;
+  var bufferCur = gameEngine.gridBuffer.cur;
+  var matrixLength = controlParameters.gridLength.currentValue;
+  var radius = controlParameters.radius.currentValue;
+
+  // Copy the matrix cur to prev
+  bufferPre = $.extend(true, [], bufferCur);
+  console.log('loging bufferPre');
+  console.log(JSON.stringify(bufferPre));
+
+  // Update cur and ever according to prev
+  for (var i = 0; i < matrixLength; i++) {
+    for (var j = 0; j < matrixLength; j++) {
+      var isAlive = isCellAlive(bufferPre, i, j, radius);
+      bufferCur[i][j] = isAlive;
+      if (isAlive) {
+        toggleCellUI(i, j, isAlive);
+        bufferEver[i][j] = isAlive;
+        addEverShadUI(i, j);
+      } else {
+        toggleCellUI(i, j, isAlive);
+      }
+    }
   }
-  gameEngine.gridBuffer.prev = $.extend(true, [], gameEngine.gridBuffer.cur);
-  console.log(JSON.stringify(gameEngine.gridBuffer.prev));
-
-
+  console.log(JSON.stringify(gameEngine.gridBuffer.cur));
+  console.log(JSON.stringify(gameEngine.gridBuffer.ever));
 };
 
-var fillEdgesOfBuffer = function(buffer) {
-  var edgeType = controlParameters.edgeNeighbor.currentValue;
-  var matrixEnd = controlParameters.gridLength.currentValue+1;
-  if (edgeType=='live') {
-    fillBufferEdgeWithValue(buffer, 1);
-  } else if (edgeType=='dead') {
-    fillBufferEdgeWithValue(buffer, 0);
-  } else if (edgeType=='toroidal') {
+var toggleCellUI = function(i, j, isAlive) {
+  // var element = $('input[name='+param.name+']');
+};
 
+var addEverShadUI = function(i, j) {
+  if (gameEngine.gridBuffer.ever[i][j]==0) {
+    // Add shade
   }
 };
 
-var fillBufferEdgeWithValue = function(buffer, value) {
-  var matrixEnd = controlParameters.gridLength.currentValue+1;
-  // Fill left and right
-  for (var i = 0; i <= matrixEnd; i++) {
-    buffer[i][0] = value;
-    buffer[i][matrixEnd] = value;
+var isCellAlive = function(buffer, i, j, radius) {
+  var over = controlParameters.overpolulation.currentValue;
+  var lonly = controlParameters.lonliness.currentValue;
+  var count = countOfNeighbor(buffer, i, j, radius);
+  return (count>=lonly&&count<=over) ? 1 : 0;
+};
+
+
+var countOfNeighbor = function(buffer, i, j, radius) {
+  // console.log('countOfNeighbor'+radius);
+  var count = 0;
+  if(radius==0) {
+    return count;
   }
-  // Fill top and bottom
-  for (var j = 1; j <= matrixEnd-1; j++) {
-    buffer[0][j] = value;
-    buffer[matrixEnd][j] = value;
+  // Count top and bottom
+  for (var m = j-radius; m <= j+radius; m++) {
+    count = valueInBuffer(buffer, i-radius, m) ? count+1 : count;
+    count = valueInBuffer(buffer, i+radius, m) ? count+1 : count;
+  }
+  // Count left and right
+  for (var n = j-radius+1; n <= j+radius-1; n++) {
+    count = valueInBuffer(buffer, n, i-radius) ? count+1 : count;
+    count = valueInBuffer(buffer, n, i+radius) ? count+1 : count;
+  }
+  return count + countOfNeighbor(buffer, i, j, radius-1);
+};
+
+var valueInBuffer = function(buffer, i, j) {
+  var matrixLength = controlParameters.gridLength.currentValue;
+  var edge = controlParameters.edgeNeighbor.currentValue;
+  if (i>=0&&i<matrixLength && j>=0&&j<matrixLength) {
+    return buffer[i][j];
+  } else if (edge=='live') {
+    return 1;
+  } else if (edge=='dead') {
+    return 0;
+  } else if (edge=='toroidal') {
+    if (i<0||i>=matrixLength) {
+      i = i<0 ? matrixLength+i : i-matrixLength;
+    }
+    if (j<0||j>=matrixLength) {
+      j = j<0 ? matrixLength+j : j-matrixLength;
+    }
+    return buffer[i][j];
   }
 };
 
 var stopRunning = function() {
   clearInterval(gameEngine.autoStep);
 };
-
-
-
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Data functions
@@ -246,11 +305,11 @@ var initGameEngine = function(size) {
     isRunning: false,
     autoStep: null,
     gridBuffer: {
-      prev: matrixWithSize(size+2),
-      cur: matrixWithSize(size+2),
+      ever: matrixWithSize(size),
+      prev: matrixWithSize(size),
+      cur: matrixWithSize(size),
     },
   };
-  fillEdgesOfBuffer(engine.gridBuffer.cur);
   return engine;
 };
 
@@ -292,8 +351,8 @@ var controlParameters = {
     name: 'lonliness',
     nameDisplay: 'Cell Lonliness',
     type: 'range',
-    defaultValue: 0,
-    currentValue: 0,
+    defaultValue: 2,
+    currentValue: 2,
     min: 0,
     max: 10,
   },
@@ -301,8 +360,8 @@ var controlParameters = {
     name: 'overpolulation',
     nameDisplay: 'Overpopulation Threshhold',
     type: 'range',
-    defaultValue: 7,
-    currentValue: 7,
+    defaultValue: 3,
+    currentValue: 3,
     min: 0,
     max: 10,
   },
@@ -310,8 +369,8 @@ var controlParameters = {
     name: 'gmin',
     nameDisplay: 'Gmin',
     type: 'range',
-    defaultValue: 2,
-    currentValue: 2,
+    defaultValue: 3,
+    currentValue: 3,
     min: 0,
     max: 10,
   },
