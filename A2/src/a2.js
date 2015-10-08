@@ -160,6 +160,9 @@ var resetAll = function() {
     element.parent().next().html(param.defaultValue);
   });
   gameEngine = initGameEngine(controlParameters.gridLength.defaultValue);
+
+  // Reset UI
+
 };
 
 var renderGrid = function(gridLength, isDefault) {
@@ -186,7 +189,9 @@ var fillGridWithRandomValue = function() {
   console.log('fillGridWithRandomValue');
   for (var i = 0; i < controlParameters.gridLength.currentValue; i++) {
     for (var j = 0; j < controlParameters.gridLength.currentValue; j++) {
-      gameEngine.gridBuffer.cur[i][j] = randomNumberFor1Or0();
+      var alive = randomNumberFor1Or0();
+      setCellState(i, j, alive);
+      // gameEngine.gridBuffer.cur[i][j] = alive;
     }
   }
   console.log(JSON.stringify(gameEngine.gridBuffer.cur));
@@ -234,17 +239,17 @@ var toggleCellState = function(i, j) {
 
 var setCellState = function(i, j, isAlive) {
   gameEngine.gridBuffer.cur[i][j] = isAlive;
-  var element = $('.grid td[row="'+i+'"][col="'+j+'"]');
-  addOnOffBackgroundByState(element, isAlive);
+  addOnOffBackgroundByState(i, j, isAlive);
+
   if (isAlive) {
     gameEngine.gridBuffer.ever[i][j] = isAlive;
     addEverShad(i, j);
   }
 };
 
-var addOnOffBackgroundByState = function(element, isAlive) {
-  console.log('addOnOffBackgroundByState');
-
+var addOnOffBackgroundByState = function(i, j, isAlive) {
+  // console.log('addOnOffBackgroundByState'+isAlive);
+  var element = $('.grid td[row="'+i+'"][col="'+j+'"]');
   if (isAlive) {
     element.html('g');
   } else {
