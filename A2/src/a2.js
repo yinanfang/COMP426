@@ -2,11 +2,12 @@
 
 $(document).ready(function(){
 
+  gameEngine = initGameEngine(controlParameters.gridLength.defaultValue);
   renderDefaultControlAndGrid();
 
   // debug
   fillGridWithRandomValue();
-  autoStep();
+  gameEngine.autoStep = startAutoStep();
 
 });
 
@@ -97,7 +98,7 @@ var isValidControlParameter = function() {
 var updateGameEngine = function(updatedParam, newValue) {
   // Stop if needed
   if (gameEngine.isRunning) {
-    stopRunning;
+    stopRunning();
   }
 
   // Update value
@@ -106,9 +107,17 @@ var updateGameEngine = function(updatedParam, newValue) {
   switch(updatedParam) {
     case 'gridLength':
       stopRunning();
-      removeGrid();
       renderGrid(newValue, true);
       console.log('finished render');
+      break;
+    case 'edgeNeighbor':
+      fillEdgesOfBuffer(gameEngine.gridBuffer.cur);
+      break;
+    case 'start':
+      gameEngine.autoStep = startAutoStep();
+      break;
+    case 'stop':
+      stopRunning();
       break;
     case 'random':
       fillGridWithRandomValue();
@@ -119,30 +128,15 @@ var updateGameEngine = function(updatedParam, newValue) {
 
   // Re-start if needed
   if (gameEngine.isRunning) {
-    autoStep();
+    startAutoStep();
   }
 };
 
-var fillGridWithRandomValue = function() {
-
-};
-
-var stopRunning = function() {
-
-};
-
-var autoStep = function() {
-
-};
-
-var oneStep = function() {
-
-};
-
-var removeGrid = function() {
-};
-
 var renderGrid = function(gridLength, isDefault) {
+  // Update gameEngine variable;
+  console.log(gameEngine);
+
+  // Update UI
   $('.grid tbody').empty();
   var grid = $('.grid tbody');
   var html;
@@ -157,18 +151,72 @@ var renderGrid = function(gridLength, isDefault) {
   grid.append(html);
 };
 
+var fillGridWithRandomValue = function() {
+  for (var i = 1; i <= controlParameters.gridLength.currentValue; i++) {
+    for (var j = 1; j <= controlParameters.gridLength.currentValue; j++) {
+      gameEngine.gridBuffer.cur[i][j] = randomNumberFor1Or0();
+    }
+  }
+};
+
+var randomNumberFor1Or0 = function() {
+  return Math.round(Math.random());
+};
+
+var startAutoStep = function() {
+  stopRunning();
+  return setInterval(function() {
+    oneStep();
+  }, controlParameters.renderInterval.currentValue);
+};
+
+var oneStep = function() {
+  // console.log(JSON.stringify(gameEngine.gridBuffer.cur));
+  if (controlParameters.edgeNeighbor.currentValue=='toroidal') {
+    fillEdgesOfBuffer(gameEngine.gridBuffer.cur);
+  }
+  gameEngine.gridBuffer.prev = $.extend(true, [], gameEngine.gridBuffer.cur);
+
+
+
+
+
+  console.log(JSON.stringify(gameEngine.gridBuffer.prev));
+};
+
+var fillEdgesOfBuffer = function (buffer) {
+
+};
+
+var stopRunning = function() {
+  clearInterval(gameEngine.autoStep);
+};
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Data functions
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+var initGameEngine = function(size) {
+  var engine = {
+    isRunning: false,
+    autoStep: null,
+    gridBuffer: {
+      prev: matrixWithSize(size+2),
+      cur: matrixWithSize(size+2),
+    },
+  };
+  fillEdgesOfBuffer(engine.gridBuffer.cur);
+  return engine;
+};
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Data
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-var gameEngine = {
-  isRunning: true,
-  gridBuffer: {
-    prev: 1,
-    cur: 2,
-  },
-};
+var gameEngine;
 
 var controlParameters = {
   gridLength: {
@@ -184,8 +232,8 @@ var controlParameters = {
     name: 'renderInterval',
     nameDisplay: 'Render Speed',
     type: 'range',
-    defaultValue: 10,
-    currentValue: 10,
+    defaultValue: 200,
+    currentValue: 200,
     min: 0,
     max: 1000,
   },
@@ -238,17 +286,26 @@ var controlParameters = {
     name: 'edgeNeighbor',
     nameDisplay: 'Edge Neighbor',
     type: 'dropdown',
-    defaultValue: 'dead',
-    currentValue: 'dead',
+    defaultValue: 'live',
+    currentValue: 'live',
     options: {
-      1: 'dead',
-      2: 'live',
+      1: 'live',
+      2: 'dead',
       3: 'toroidal',
     },
   },
 };
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Helper Functions
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
+var matrixWithSize = function(size) {
+  var arr = new Array(size);
+  for (var i = 0; i < size; i++) {
+    arr[i] = Array.apply(null, Array(size)).map(Number.prototype.valueOf,0);
+  }
+  return arr;
+};
 
 
