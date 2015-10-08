@@ -206,7 +206,6 @@ var startAutoStep = function() {
 };
 
 var oneStep = function() {
-  var bufferEver = gameEngine.gridBuffer.ever;
   var bufferPre = gameEngine.gridBuffer.pre;
   var bufferCur = gameEngine.gridBuffer.cur;
   var matrixLength = controlParameters.gridLength.currentValue;
@@ -221,25 +220,39 @@ var oneStep = function() {
   for (var i = 0; i < matrixLength; i++) {
     for (var j = 0; j < matrixLength; j++) {
       var isAlive = isCellAlive(bufferPre, i, j, radius);
-      bufferCur[i][j] = isAlive;
-      if (isAlive) {
-        toggleCellUI(i, j, isAlive);
-        bufferEver[i][j] = isAlive;
-        addEverShadUI(i, j);
-      } else {
-        toggleCellUI(i, j, isAlive);
-      }
+      setCellState(i, j, isAlive);
     }
   }
   console.log(JSON.stringify(gameEngine.gridBuffer.cur));
   console.log(JSON.stringify(gameEngine.gridBuffer.ever));
 };
 
-var toggleCellUI = function(i, j, isAlive) {
-  // var element = $('input[name='+param.name+']');
+var toggleCellState = function(i, j) {
+  var alive = gameEngine.gridBuffer.currentValue ? 0 : 1;
+  setCellState(i, j, alive);
 };
 
-var addEverShadUI = function(i, j) {
+var setCellState = function(i, j, isAlive) {
+  gameEngine.gridBuffer.cur[i][j] = isAlive;
+  var element = $('.grid td[row="'+i+'"][col="'+j+'"]');
+  addOnOffBackgroundByState(element, isAlive);
+  if (isAlive) {
+    gameEngine.gridBuffer.ever[i][j] = isAlive;
+    addEverShad(i, j);
+  }
+};
+
+var addOnOffBackgroundByState = function(element, isAlive) {
+  console.log('addOnOffBackgroundByState');
+
+  if (isAlive) {
+    element.html('g');
+  } else {
+    element.html('n');
+  }
+};
+
+var addEverShad = function(i, j) {
   if (gameEngine.gridBuffer.ever[i][j]==0) {
     // Add shade
   }
