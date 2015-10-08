@@ -7,7 +7,8 @@ $(document).ready(function(){
 
   // debug
   fillGridWithRandomValue();
-  gameEngine.autoStep = startAutoStep();
+  gameEngine.isRunning = true;
+  startAutoStep();
 
 });
 
@@ -98,6 +99,7 @@ var isValidControlParameter = function() {
 var updateGameEngine = function(updatedParam, newValue) {
   // Stop if needed
   if (gameEngine.isRunning) {
+    console.log('pause before updateGameEngine');
     stopRunning();
   }
 
@@ -106,17 +108,23 @@ var updateGameEngine = function(updatedParam, newValue) {
   console.log('updatedParam: '+updatedParam+'; newValue: '+newValue);
   switch(updatedParam) {
     case 'gridLength':
-      stopRunning();
       renderGrid(newValue, true);
       console.log('finished render');
+      break;
+    case 'renderInterval':
+      controlParameters.renderInterval.currentValue = newValue;
+      break;
+    case 'radius':
+      controlParameters.radius.currentValue = newValue;
       break;
     case 'edgeNeighbor':
       fillEdgesOfBuffer(gameEngine.gridBuffer.cur);
       break;
     case 'start':
-      gameEngine.autoStep = startAutoStep();
+      startAutoStep();
       break;
     case 'stop':
+      gameEngine.isRunning = false;
       stopRunning();
       break;
     case 'random':
@@ -128,6 +136,7 @@ var updateGameEngine = function(updatedParam, newValue) {
 
   // Re-start if needed
   if (gameEngine.isRunning) {
+    console.log('restart after updateGameEngine');
     startAutoStep();
   }
 };
@@ -165,7 +174,9 @@ var randomNumberFor1Or0 = function() {
 
 var startAutoStep = function() {
   stopRunning();
-  return setInterval(function() {
+  console.log('startAutoStep with controlParameters: ');
+  console.log(controlParameters);
+  gameEngine.autoStep =  setInterval(function() {
     oneStep();
   }, controlParameters.renderInterval.currentValue);
 };
