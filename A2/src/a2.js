@@ -5,10 +5,14 @@ $(document).ready(function(){
   gameEngine = initGameEngine(controlParameters.gridLength.defaultValue);
   renderDefaultControlAndGrid();
 
-  // debug
+  // debug - running
+  // fillGridWithRandomValue();
+  // gameEngine.isRunning = true;
+  // startAutoStep();
+
+  // debug - one step
   fillGridWithRandomValue();
-  gameEngine.isRunning = true;
-  startAutoStep();
+  oneStep();
 
 });
 
@@ -112,10 +116,12 @@ var updateGameEngine = function(updatedParam, newValue) {
       console.log('finished render');
       break;
     case 'renderInterval':
-      controlParameters.renderInterval.currentValue = newValue;
-      break;
     case 'radius':
-      controlParameters.radius.currentValue = newValue;
+    case 'lonliness':
+    case 'overpolulation':
+    case 'gmin':
+    case 'gmax':
+      controlParameters[updatedParam].currentValue = newValue;
       break;
     case 'edgeNeighbor':
       fillEdgesOfBuffer(gameEngine.gridBuffer.cur);
@@ -127,6 +133,12 @@ var updateGameEngine = function(updatedParam, newValue) {
       gameEngine.isRunning = false;
       stopRunning();
       break;
+    case 'step':
+      oneStep();
+      break;
+    // case 'reset':
+    //   resetAll();
+    //   break;
     case 'random':
       fillGridWithRandomValue();
       break;
@@ -187,16 +199,35 @@ var oneStep = function() {
     fillEdgesOfBuffer(gameEngine.gridBuffer.cur);
   }
   gameEngine.gridBuffer.prev = $.extend(true, [], gameEngine.gridBuffer.cur);
-
-
-
-
-
   console.log(JSON.stringify(gameEngine.gridBuffer.prev));
+
+
 };
 
-var fillEdgesOfBuffer = function (buffer) {
+var fillEdgesOfBuffer = function(buffer) {
+  var edgeType = controlParameters.edgeNeighbor.currentValue;
+  var matrixEnd = controlParameters.gridLength.currentValue+1;
+  if (edgeType=='live') {
+    fillBufferEdgeWithValue(buffer, 1);
+  } else if (edgeType=='dead') {
+    fillBufferEdgeWithValue(buffer, 0);
+  } else if (edgeType=='toroidal') {
 
+  }
+};
+
+var fillBufferEdgeWithValue = function(buffer, value) {
+  var matrixEnd = controlParameters.gridLength.currentValue+1;
+  // Fill left and right
+  for (var i = 0; i <= matrixEnd; i++) {
+    buffer[i][0] = value;
+    buffer[i][matrixEnd] = value;
+  }
+  // Fill top and bottom
+  for (var j = 1; j <= matrixEnd-1; j++) {
+    buffer[0][j] = value;
+    buffer[matrixEnd][j] = value;
+  }
 };
 
 var stopRunning = function() {
@@ -243,8 +274,8 @@ var controlParameters = {
     name: 'renderInterval',
     nameDisplay: 'Render Speed',
     type: 'range',
-    defaultValue: 200,
-    currentValue: 200,
+    defaultValue: 800,
+    currentValue: 800,
     min: 0,
     max: 1000,
   },
