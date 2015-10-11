@@ -154,8 +154,12 @@ var updateGameEngine = function(updatedParam, newValue) {
 var resetAll = function() {
   $.each(controlParameters, function(key1, param) {
     param.currentValue = param.defaultValue;
-    // console.log($('.control[name="'+param.name+'"]'));
-    var element = $('input[name='+param.name+']');
+    var element;
+    if (param.type=='range') {
+      element = $('input[name='+param.name+']');
+    } else if (param.type=='dropdown') {
+      element = $('select[name='+param.name+']');
+    }
     element.val(param.defaultValue);
     element.parent().next().html(param.defaultValue);
   });
