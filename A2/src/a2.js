@@ -20,19 +20,7 @@ var renderDefaultControlAndGrid = function() {
   // Initial rendering for control and grid
   var shouldRenderDefaultView = true;
   renderControl(controlParameters, shouldRenderDefaultView);
-  renderGrid(controlParameters.gridLength.defaultValue, shouldRenderDefaultView);
-
-  // Re-position and align the table
-  var gridViewPort = $('.grid');
-  var gridViewPortHeight = gridViewPort.height();
-  var gridViewPortWidth = gridViewPort.width();
-  var gridViewPortSize = Math.min(gridViewPortHeight, gridViewPortWidth);
-  var tableSize = gridViewPortSize*0.9;
-  var tableMarginTop = Math.round((gridViewPortHeight - tableSize)/2);
-  $('.grid table').css('height', tableSize);
-  $('.grid table').css('width', tableSize);
-  $('.grid table').css('margin-top', tableMarginTop);
-
+  renderGrid(controlParameters.gridLength.defaultValue);
 };
 
 var renderControl = function(controlParameters, isDefault) {
@@ -134,7 +122,7 @@ var gameEngineControlUpdateProcedure = function(updatedParam, newValue) {
   };
 };
 
-var renderGrid = function(gridLength, isDefault) {
+var renderGrid = function(gridLength) {
   // Update gameEngine variable;
   console.log('Rendering grid with gameEngine');
   console.log(gameEngine);
@@ -153,12 +141,35 @@ var renderGrid = function(gridLength, isDefault) {
   }
   grid.append(html);
 
+  // Re-position and align the table
+  var gridViewPort = $('.grid');
+  var gridViewPortHeight = gridViewPort.height();
+  var gridViewPortWidth = gridViewPort.width();
+  var gridViewPortSize = Math.min(gridViewPortHeight, gridViewPortWidth);
+  var tableSize = gridViewPortSize*0.9;
+  var tableMarginTop = Math.round((gridViewPortHeight - tableSize)/2);
+  $('.grid table').css('height', tableSize);
+  $('.grid table').css('width', tableSize);
+  $('.grid table').css('margin-top', tableMarginTop);
+
   $('.grid td').click(function(event) {
-    console.log(event.target);
+    console.log(event.target.getAttribute('row'));
+    console.log(event.target.getAttribute('col'));
+    var row = event.target.getAttribute('row');
+    var col = event.target.getAttribute('col');
+    updateGameEngine(gameEngineGridUpdateProcedure(row, col));
+        // updateGameEngine(gameEngineControlUpdateProcedure($(target).attr('name'), 1));
+
     // console.log($(this));
     // console.log(event.target.nodeName);
     // handlerForControlUpdate(event.target);
   });
+};
+
+var gameEngineGridUpdateProcedure = function(i, j) {
+  return function() {
+    toggleCellState(i, j);
+  };
 };
 
 var updateGameEngine = function(updatedProcedure) {
@@ -197,7 +208,7 @@ var resetAll = function() {
   // console.log('after'+gameEngine.isRunning);
 
   // Reset UI
-  renderGrid(gridLength, true);
+  renderGrid(gridLength);
 };
 
 var fillGridWithRandomValue = function() {
@@ -232,6 +243,9 @@ var oneStep = function() {
   var matrixLength = controlParameters.gridLength.currentValue;
   var radius = controlParameters.radius.currentValue;
 
+  // console.log(JSON.stringify(gameEngine.gridBuffer.cur));
+  // console.log(JSON.stringify(gameEngine.gridBuffer.ever));
+
   // Copy the matrix cur to prev
   bufferPre = $.extend(true, [], bufferCur);
   // console.log('loging bufferPre');
@@ -244,12 +258,13 @@ var oneStep = function() {
       setCellState(i, j, isAlive);
     }
   }
-  // console.log(JSON.stringify(gameEngine.gridBuffer.cur));
-  // console.log(JSON.stringify(gameEngine.gridBuffer.ever));
+  console.log(JSON.stringify(gameEngine.gridBuffer.cur));
+  console.log(JSON.stringify(gameEngine.gridBuffer.ever));
 };
 
 var toggleCellState = function(i, j) {
-  var alive = gameEngine.gridBuffer.currentValue ? 0 : 1;
+  var alive = gameEngine.gridBuffer.cur[i][j] ? 0 : 1;
+  console.log('toggleCellState: '+alive);
   setCellState(i, j, alive);
 };
 
@@ -260,34 +275,18 @@ var setCellState = function(i, j, isAlive) {
   if (isAlive) {
     gameEngine.gridBuffer.ever[i][j] = isAlive;
   }
-  if (!isAlive) {
-    addEverShad(i, j);
-  }
 };
 
 var addOnOffBackgroundByState = function(i, j, isAlive) {
   // console.log('addOnOffBackgroundByState'+isAlive);
   var element = $('.grid td[row="'+i+'"][col="'+j+'"]');
   if (isAlive) {
-    element.addClass('on');
-    element.html('g');
+    element.removeClass('never');
+    element.addClass('ever on');
+    // element.html('g');
   } else {
     element.removeClass('on');
-    element.html('n');
-  }
-};
-
-var addEverShad = function(i, j) {
-  // Currently dead but lived in the past
-  if (gameEngine.gridBuffer.ever[i][j]==1 && gameEngine.gridBuffer.cur[i][j]==0) {
-    // console.log('adding ever');
-    var element = $('.grid td[row="'+i+'"][col="'+j+'"]');
-    element.html('e');
-    element.removeClass('never');
-    element.addClass('ever');
-    // console.log('EVER: i=' +i+' ; j='+j);
-  } else {
-    // console.log('never: i=' +i+' ; j='+j);
+    // element.html('n');
   }
 };
 
