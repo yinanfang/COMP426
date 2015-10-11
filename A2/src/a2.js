@@ -62,37 +62,31 @@ var renderControl = function(controlParameters, isDefault) {
   $('.control').on('input change', function(event) {
     // console.log($(this));
     // console.log(event.target.nodeName);
-    handlerForControl(event.target);
+    handlerForControlUpdate(event.target);
   });
   $('.control button').click(function(event) {
     // console.log($(this));
     // console.log(event.target.nodeName);
-    handlerForControl(event.target);
+    handlerForControlUpdate(event.target);
   });
 
 };
 
-var handlerForControl = function(target) {
+var handlerForControlUpdate = function(target) {
   console.log(target);
-  if (target.nodeName=='INPUT') {
-    updateControlParameters(target);
-  } else if (target.nodeName=='SELECT') {
-    updateControlParameters(target);
+  if (target.nodeName=='INPUT'||target.nodeName=='SELECT') {
+    // Update Game engine if parameters are valid
+    if (isValidControlParameter()) {
+      $(target).parent().next().html($(target).val());
+      // Update controlParameters
+      var newValue = (target.nodeName=='INPUT') ? parseInt($(target).val(), 10) : $(target).val();
+      var updatedParam = $(target).attr('name');
+      controlParameters[updatedParam].currentValue = newValue;
+
+      updateGameEngine(gameEngineControlUpdateProcedure(updatedParam, newValue));
+    }
   } else if (target.nodeName=='BUTTON') {
-    updateGameEngine($(target).attr('name'), 1);
-  }
-};
-
-var updateControlParameters = function(target) {
-  $(target).parent().next().html($(target).val());
-
-  // Update controlParameters
-  var newValue = (target.nodeName=='INPUT') ? parseInt($(target).val(), 10) : $(target).val();
-  var updatedParam = $(target).attr('name');
-  controlParameters[updatedParam].currentValue = newValue;
-  // Update Game engine if parameters are valid
-  if (isValidControlParameter()) {
-    updateGameEngine(updatedParam, newValue);
+    updateGameEngine(gameEngineControlUpdateProcedure($(target).attr('name'), 1));
   }
 };
 
@@ -100,49 +94,81 @@ var isValidControlParameter = function() {
   return true;
 };
 
-var updateGameEngine = function(updatedParam, newValue) {
+var gameEngineControlUpdateProcedure = function(updatedParam, newValue) {
+  return function() {
+    // Update value
+    console.log('updatedParam: '+updatedParam+'; newValue: '+newValue);
+    switch(updatedParam) {
+      case 'gridLength':
+        renderGrid(newValue, true);
+        console.log('finished render');
+        break;
+      case 'renderInterval':
+      case 'radius':
+      case 'lonliness':
+      case 'overpolulation':
+      case 'gmin':
+      case 'gmax':
+      case 'edgeNeighbor':
+        controlParameters[updatedParam].currentValue = newValue;
+        break;
+      case 'start':
+        startAutoStep();
+        break;
+      case 'stop':
+        gameEngine.isRunning = false;
+        stopRunning();
+        break;
+      case 'step':
+        oneStep();
+        break;
+      case 'reset':
+        resetAll();
+        break;
+      case 'random':
+        fillGridWithRandomValue();
+        break;
+      default:
+        console.log('Unrecognized updatedParam!!');
+    }
+  };
+};
+
+var renderGrid = function(gridLength, isDefault) {
+  // Update gameEngine variable;
+  console.log('Rendering grid with gameEngine');
+  console.log(gameEngine);
+
+  // Update UI
+  $('.grid tbody').empty();
+  var grid = $('.grid tbody');
+  var html;
+  for (var i = 0; i < gridLength; i++) {
+    html += '<tr>';
+    for (var j = 0; j < gridLength; j++) {
+      // check isDefault -> class never, on?
+      html += '<td class="never" row="'+i+'" col="'+j+'"></td>';
+    }
+    html += '</tr>';
+  }
+  grid.append(html);
+
+  $('.grid td').click(function(event) {
+    console.log(event.target);
+    // console.log($(this));
+    // console.log(event.target.nodeName);
+    // handlerForControlUpdate(event.target);
+  });
+};
+
+var updateGameEngine = function(updatedProcedure) {
   // Stop if needed
   if (gameEngine.isRunning) {
     console.log('pause before updateGameEngine');
     stopRunning();
   }
 
-  // Update value
-  // Need to stop everything and re-render grid if the gridLength is changed
-  console.log('updatedParam: '+updatedParam+'; newValue: '+newValue);
-  switch(updatedParam) {
-    case 'gridLength':
-      renderGrid(newValue, true);
-      console.log('finished render');
-      break;
-    case 'renderInterval':
-    case 'radius':
-    case 'lonliness':
-    case 'overpolulation':
-    case 'gmin':
-    case 'gmax':
-    case 'edgeNeighbor':
-      controlParameters[updatedParam].currentValue = newValue;
-      break;
-    case 'start':
-      startAutoStep();
-      break;
-    case 'stop':
-      gameEngine.isRunning = false;
-      stopRunning();
-      break;
-    case 'step':
-      oneStep();
-      break;
-    case 'reset':
-      resetAll();
-      break;
-    case 'random':
-      fillGridWithRandomValue();
-      break;
-    default:
-      console.log('Unrecognized updatedParam!!');
-  }
+  updatedProcedure();
 
   // Re-start if needed
   if (gameEngine.isRunning) {
@@ -165,33 +191,13 @@ var resetAll = function() {
   });
   var gridLength = controlParameters.gridLength.defaultValue;
   var wasRunningBeforeReset = gameEngine.isRunning;
-  console.log('wasRunningBeforeReset'+wasRunningBeforeReset);
+  // console.log('wasRunningBeforeReset'+wasRunningBeforeReset);
   gameEngine = initGameEngine(gridLength);
   gameEngine.isRunning = wasRunningBeforeReset;
-  console.log('after'+gameEngine.isRunning);
+  // console.log('after'+gameEngine.isRunning);
 
   // Reset UI
   renderGrid(gridLength, true);
-};
-
-var renderGrid = function(gridLength, isDefault) {
-  // Update gameEngine variable;
-  console.log('Rendering grid with gameEngine');
-  console.log(gameEngine);
-
-  // Update UI
-  $('.grid tbody').empty();
-  var grid = $('.grid tbody');
-  var html;
-  for (var i = 0; i < gridLength; i++) {
-    html += '<tr>';
-    for (var j = 0; j < gridLength; j++) {
-      // check isDefault -> class never, on?
-      html += '<td class="never" row="'+i+'" col="'+j+'"></td>';
-    }
-    html += '</tr>';
-  }
-  grid.append(html);
 };
 
 var fillGridWithRandomValue = function() {
@@ -277,6 +283,7 @@ var addEverShad = function(i, j) {
     // console.log('adding ever');
     var element = $('.grid td[row="'+i+'"][col="'+j+'"]');
     element.html('e');
+    element.removeClass('never');
     element.addClass('ever');
     // console.log('EVER: i=' +i+' ; j='+j);
   } else {
