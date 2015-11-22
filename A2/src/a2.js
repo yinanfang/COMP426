@@ -162,19 +162,20 @@ var renderGrid = function(gridLength) {
     console.log(event.target.getAttribute('col'));
     var row = event.target.getAttribute('row');
     var col = event.target.getAttribute('col');
-    updateGameEngine(gameEngineGridUpdateProcedure(row, col));
-        // updateGameEngine(gameEngineControlUpdateProcedure($(target).attr('name'), 1));
+    if (event.shiftKey) {
+      updateGameEngine(function() {
+        setCellState(row, col, 1);
+      });
+    } else {
+      updateGameEngine(function() {
+        toggleCellState(row, col);
+      });
+    }
 
     // console.log($(this));
     // console.log(event.target.nodeName);
     // handlerForControlUpdate(event.target);
   });
-};
-
-var gameEngineGridUpdateProcedure = function(i, j) {
-  return function() {
-    toggleCellState(i, j);
-  };
 };
 
 var updateGameEngine = function(updatedProcedure) {
