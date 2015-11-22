@@ -1,0 +1,51 @@
+html, body {
+  margin: 0;
+  height: 100%;
+  background: #CFCFC4;
+}
+
+.header {
+  height: 5%;
+}
+
+.footer {
+  height: 5%;
+}
+
+.container {
+  background: red;
+  width: 1240px;
+  height: 90%;
+  margin: 0 auto;
+}
+
+.container div{
+  float: left;
+  min-height: 100%;
+}
+.control {
+  width: 16%;
+  text-align: center;
+  background: white;
+}
+
+.grid {
+  width: 84%;
+  background: white;
+}
+
+.grid table {
+  margin: 0 auto;
+}
+
+.never {
+  background: #F3F3F3;
+}
+
+.ever {
+  background: #AEC6CF;
+}
+
+.on {
+  background: #77DD77;
+}

@@ -1,0 +1,21 @@
+## How many touchdowns did Peyton Manning score or pass when playing against Miami?
+
+SELECT COUNT(*) FROM ScoringEvent, ScoreType, Player, Team
+WHERE
+(ScoringEvent.PlayerID=Player.id OR ScoringEvent.QuarterbackID=Player.id)
+AND (ScoringEvent.OpposingTeamID=Team.id AND TeamName='Miami')
+AND ScoringEvent.ScoreTypeID=ScoreType.id
+AND Player.FirstName='Peyton'
+AND Player.LastName='Manning'
+
+
+## List all the games (date and opposing team) that Tennessee won.
+
+
+
+
+
+
+## How rushing touchdowns did Reggie Bush score in October?
+
+## List all the teams that never won in a game in which someone with the last name Smith had a rushing touchdown.

@@ -1,0 +1,32 @@
+Player
+id FName LName TeamID
+
+Team
+id TeamName
+
+ScoringEvent - player determines team
+id GameDate GameTeamID PlayerID ScoreTypeID QuarterbackID
+
+ScoreType
+id Type Points
+
+
+
+List all the games (date and opposing team) that Tennessee won.
+
+join
+sum total score
+selected team=Tennessee where team1=team2 && team
+
+http://stackoverflow.com/questions/907366/self-join-of-a-subquery
+
+SELECT person_id, SUM(pushups) FROM 'Excercise' WHERE 1 GROUP BY person_id LIMIT 0, 30
+
+SELECT ...     () as q1 () as q2 where q1.date = q2.date AND q1.sum > q2.sum
+
+not relational
+SELECT * FROM 'Excercise' WHERE person_id = (
+  SELECT id FROM Person Where name='Ketan'
+)
+relational - join
+SELECT * FROM 'Excervice', Person WHERE

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html ng-app="app">
+<head>
+  <meta charset="utf-8">
+  <title>COMP 426, Fall 2014, A1</title>
+  <link rel="stylesheet" type="text/css" href="a2.css">
+</head>
+
+<body>
+  <div class="header"></div>
+  <div class="container" ng-controller="container">
+    <div class="control">
+      <table>
+        <tbody></tbody>
+      </table>
+      <br><br>
+      <button type="button" name="start">Start</button>
+      <button type="button" name="stop">Stop</button>
+      <button type="button" name="step">Step</button>
+      <button type="button" name="reset">Reset</button>
+      <button type="button" name="random">Random</button>
+    </div>
+    <div displayTable class="grid">
+      <table>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="footer">
+  </div>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+  <script src="a2.js"></script>
+</body>
+</html>
