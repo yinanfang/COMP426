@@ -125,6 +125,11 @@ var gameEngineControlUpdateProcedure = function(updatedParam, newValue) {
 var renderGrid = function(gridLength) {
   // Update gameEngine variable;
   console.log('Rendering grid with gameEngine');
+  gameEngine.gridBuffer={
+    ever: matrixWithSize(gridLength),
+    prev: matrixWithSize(gridLength),
+    cur: matrixWithSize(gridLength),
+  };
   console.log(gameEngine);
 
   // Update UI
@@ -213,6 +218,9 @@ var resetAll = function() {
 
 var fillGridWithRandomValue = function() {
   console.log('fillGridWithRandomValue');
+  console.log(JSON.stringify(gameEngine.gridBuffer.cur));
+  console.log(controlParameters.gridLength.currentValue);
+  // console
   for (var i = 0; i < controlParameters.gridLength.currentValue; i++) {
     for (var j = 0; j < controlParameters.gridLength.currentValue; j++) {
       var alive = randomNumberFor1Or0();
@@ -220,7 +228,7 @@ var fillGridWithRandomValue = function() {
       // gameEngine.gridBuffer.cur[i][j] = alive;
     }
   }
-  // console.log(JSON.stringify(gameEngine.gridBuffer.cur));
+  console.log(JSON.stringify(gameEngine.gridBuffer.cur));
 };
 
 var randomNumberFor1Or0 = function() {
