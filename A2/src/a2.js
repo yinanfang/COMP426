@@ -243,6 +243,10 @@ var oneStep = function() {
   var matrixLength = controlParameters.gridLength.currentValue;
   var radius = controlParameters.radius.currentValue;
 
+  console.log(matrixLength);
+  console.log(radius);
+
+
   // console.log(JSON.stringify(gameEngine.gridBuffer.cur));
   // console.log(JSON.stringify(gameEngine.gridBuffer.ever));
 
@@ -254,6 +258,7 @@ var oneStep = function() {
   // Update cur and ever according to prev
   for (var i = 0; i < matrixLength; i++) {
     for (var j = 0; j < matrixLength; j++) {
+      // console.log('i='+i+'; j='+j+'; radius='+radius);
       var isAlive = isCellAlive(bufferPre, i, j, radius);
       setCellState(i, j, isAlive);
     }
@@ -291,30 +296,54 @@ var addOnOffBackgroundByState = function(i, j, isAlive) {
 };
 
 var isCellAlive = function(buffer, i, j, radius) {
+  // console.log('isCellAlive');
   var over = controlParameters.overpolulation.currentValue;
   var lonly = controlParameters.lonliness.currentValue;
   var count = countOfNeighbor(buffer, i, j, radius);
-  return (count>=lonly&&count<=over) ? 1 : 0;
+  if (buffer[i][j]==1) {
+    return (count>=lonly&&count<=over) ? 1 : 0;
+  } else {
+    return (count>=controlParameters.gmin.currentValue&&count<=controlParameters.gmax.currentValue) ? 1 : 0;
+  }
 };
 
 
 var countOfNeighbor = function(buffer, i, j, radius) {
-  // console.log('countOfNeighbor'+radius);
+  // console.log('countOfNeighbor>>i='+i+'; j='+j+'; radius='+radius+'; i-radius='+(i-radius)+'; i+radius='+(i+radius)+'; j-radius='+(j-radius)+'; j-radius='+(j+radius));
+
   var count = 0;
   if(radius==0) {
     return count;
   }
-  // Count top and bottom
-  for (var m = j-radius; m <= j+radius; m++) {
-    count = valueInBuffer(buffer, i-radius, m) ? count+1 : count;
-    count = valueInBuffer(buffer, i+radius, m) ? count+1 : count;
+  // Count square
+  for (var m = i-radius; m <= i+radius; m++) {
+    for (var n = j-radius; n <= j+radius; n++) {
+      // console.log('m='+m+'; n='+n);
+      count = valueInBuffer(buffer, m, n) ? count+1 : count;
+      // if (i==19) {
+      //   console.log('m='+m+'; n='+n+'; valueInBuffer='+valueInBuffer(buffer, m, n));
+      // }
+    }
   }
-  // Count left and right
-  for (var n = j-radius+1; n <= j+radius-1; n++) {
-    count = valueInBuffer(buffer, n, i-radius) ? count+1 : count;
-    count = valueInBuffer(buffer, n, i+radius) ? count+1 : count;
+  // Minue itself
+  if (valueInBuffer(buffer, i, j)==1) {
+    count--;
   }
-  return count + countOfNeighbor(buffer, i, j, radius-1);
+
+  // console.log(count);
+  return count;
+
+  // // Count top and bottom
+  // for (var m = j-radius; m <= j+radius; m++) {
+  //   count = valueInBuffer(buffer, i-radius, m) ? count+1 : count;
+  //   count = valueInBuffer(buffer, i+radius, m) ? count+1 : count;
+  // }
+  // // Count left and right
+  // for (var n = j-radius+1; n <= j+radius-1; n++) {
+  //   count = valueInBuffer(buffer, n, i-radius) ? count+1 : count;
+  //   count = valueInBuffer(buffer, n, i+radius) ? count+1 : count;
+  // }
+  // return count;
 };
 
 var valueInBuffer = function(buffer, i, j) {
@@ -387,8 +416,8 @@ var controlParameters = {
     name: 'radius',
     nameDisplay: 'Neighbor Radius',
     type: 'range',
-    defaultValue: 2,
-    currentValue: 2,
+    defaultValue: 1,
+    currentValue: 1,
     min: 1,
     max: 10,
   },
@@ -432,11 +461,11 @@ var controlParameters = {
     name: 'edgeNeighbor',
     nameDisplay: 'Edge Neighbor',
     type: 'dropdown',
-    defaultValue: 'live',
-    currentValue: 'live',
+    defaultValue: 'dead',
+    currentValue: 'dead',
     options: {
-      1: 'live',
-      2: 'dead',
+      1: 'dead',
+      2: 'live',
       3: 'toroidal',
     },
   },
