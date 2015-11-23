@@ -64,32 +64,51 @@ var handlerForControlUpdate = function(target) {
   console.log(target);
   if (target.nodeName=='INPUT'||target.nodeName=='SELECT') {
     // Update Game engine if parameters are valid
-    if (isValidControlParameter()) {
-      $(target).parent().next().html($(target).val());
-      // Update controlParameters
-      var newValue = (target.nodeName=='INPUT') ? parseInt($(target).val(), 10) : $(target).val();
-      var updatedParam = $(target).attr('name');
-      controlParameters[updatedParam].currentValue = newValue;
-
-      updateGameEngine(gameEngineControlUpdateProcedure(updatedParam, newValue));
-    }
+    var newValue = (target.nodeName=='INPUT') ? parseInt($(target).val(), 10) : $(target).val();
+    var updatedParam = $(target).attr('name');
+    newValue = validControlParameterValue(updatedParam, newValue, target);
+    // Update controlParameters
+    $(target).parent().next().html(newValue);
+    // controlParameters[updatedParam].currentValue = newValue;
+    updateGameEngine(gameEngineControlUpdateProcedure(updatedParam, newValue));
   } else if (target.nodeName=='BUTTON') {
     updateGameEngine(gameEngineControlUpdateProcedure($(target).attr('name'), 1));
   }
 };
 
-var isValidControlParameter = function() {
-  return true;
+var validControlParameterValue = function(attribute, value, target) {
+  var radius = controlParameters.radius.currentValue;
+  var limit = 4*Math.pow(radius, 2)+4*radius;
+  var validValue;
+  if (attribute=='lonliness'&&value>controlParameters.overpolulation.currentValue) {
+    validValue = controlParameters.overpolulation.currentValue;
+    $('input[name='+attribute+']').val(validValue);
+    return validValue;
+  } else if (attribute=='overpolulation'&&value>=limit) {
+    validValue = limit-1;
+    $('input[name='+attribute+']').val(validValue);
+    return validValue;
+  } else if (attribute=='gmin'&&value>controlParameters.gmax.currentValue) {
+    validValue = controlParameters.gmax.currentValue;
+    $('input[name='+attribute+']').val(validValue);
+    return validValue;
+  } else if (attribute=='gmax'&&value>limit) {
+    validValue = limit-1;
+    $('input[name='+attribute+']').val(validValue);
+    return validValue;
+  }
+  return value;
 };
 
 var gameEngineControlUpdateProcedure = function(updatedParam, newValue) {
   return function() {
     // Update value
-    console.log('updatedParam: '+updatedParam+'; newValue: '+newValue);
+    console.log('gameEngineControlUpdateProcedure updatedParam: '+updatedParam+'; newValue: '+newValue);
     switch(updatedParam) {
       case 'gridLength':
         renderGrid(newValue, true);
         console.log('finished render');
+        controlParameters[updatedParam].currentValue = newValue;
         break;
       case 'renderInterval':
       case 'radius':
