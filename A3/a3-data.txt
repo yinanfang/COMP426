@@ -343,3 +343,12 @@ Doug Baldwin Seattle SanFrancisco 2015-12-06 passing Russell Wilson
 Doug Baldwin Seattle SanFrancisco 2015-12-06 passing Russell Wilson
 Marshawn Lynch Seattle SanFrancisco 2015-12-06 rushing
 Steven Hauschka Seattle SanFrancisco 2015-12-06 fieldgoal
+Steve Smith Baltimore Pittsburgh 2015-11-15 rushing
+Josh Scobee Pittsburgh Baltimore 2015-11-15 fieldgoal
+Leveon Bell Pittsburgh Baltimore 2015-11-15 rushing
+Justin Tucker Baltimore Pittsburgh 2015-11-15 fieldgoal
+Justin Tucker Baltimore Pittsburgh 2015-11-15 fieldgoal
+Torrey Smith SanFrancisco Baltimore 2015-10-18 rushing
+Anquan Boldin SanFrancisco Baltimore 2015-10-18 passing Colin Kaepernick
+Justin Tucker Baltimore SanFrancisco 2015-10-18 fieldgoal
+Justin Tucker Baltimore SanFrancisco 2015-10-18 fieldgoal

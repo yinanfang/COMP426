@@ -1,5 +1,7 @@
 ## How many touchdowns did Peyton Manning score or pass when playing against Miami?
 
+Answer: 2
+
 SELECT COUNT(*) FROM ScoringEvent, ScoreType, Player, Team
 WHERE
 (ScoringEvent.PlayerID=Player.id OR ScoringEvent.QuarterbackID=Player.id)
@@ -11,11 +13,171 @@ AND Player.LastName='Manning'
 
 ## List all the games (date and opposing team) that Tennessee won.
 
+Answer: 7
+
+SELECT GameDate, 'Tennessee', Team.TeamName
+FROM (
+  SELECT q1.GameDate, q1.TeamID, q1.sum1, q1.OpposingTeamID, q2.sum2
+  FROM
+  (
+    SELECT ScoringEvent.id, GameDate, Player.TeamID, OpposingTeamID, ScoreType.Type, SUM(ScoreType.Points) AS sum1
+    FROM ScoringEvent, Player, Team, ScoreType
+    WHERE
+    (ScoringEvent.PlayerID=Player.id AND Player.TeamID=Team.id AND TeamName='Tennessee')
+    AND ScoringEvent.ScoreTypeID=ScoreType.id
+    GROUP BY GameDate
+  ) q1
+  LEFT JOIN
+  (
+    SELECT ScoringEvent.id, GameDate, Player.TeamID, OpposingTeamID, ScoreType.Type, SUM(ScoreType.Points) AS sum2
+    FROM ScoringEvent, Player, Team, ScoreType
+    WHERE
+    (ScoringEvent.OpposingTeamID=Team.id AND TeamName='Tennessee')
+    AND ScoringEvent.ScoreTypeID=ScoreType.id
+    AND ScoringEvent.PlayerID=Player.id
+    GROUP BY GameDate
+  ) q2
+  ON
+  q1.GameDate=q2.GameDate AND q1.TeamID=q2.OpposingTeamID AND q1.OpposingTeamID=q2.TeamID
+  WHERE
+  q1.sum1>IFNULL(q2.sum2,0)
+) result,
+Team
+WHERE
+result.OpposingTeamID=Team.id
 
 
+## How many rushing touchdowns did Reggie Bush score in October?
 
+Answer: 3
 
+SELECT COUNT(*) FROM ScoringEvent, ScoreType, Player
+WHERE
+(ScoreTypeID=ScoreType.id AND ScoreType.Type='rushing')
+AND (PlayerID=Player.id AND Player.FirstName='Reggie' AND Player.LastName='Bush')
+AND (GameDate>='2015-10-01' AND GameDate<='2015-10-31')
 
-## How rushing touchdowns did Reggie Bush score in October?
 
 ## List all the teams that never won in a game in which someone with the last name Smith had a rushing touchdown.
+
+Answer: Pittsburgh
+
+SELECT Team.TeamName
+FROM (
+  SELECT q1.OpposingTeamID
+  FROM
+  (
+    SELECT source.GameDate, source.TeamID, source.OpposingTeamID, source.sum
+    FROM
+    (
+      SELECT ScoringEvent.id, GameDate, Player.TeamID, OpposingTeamID
+      FROM ScoringEvent, Player, Team
+      WHERE
+      (ScoringEvent.PlayerID=Player.id AND Player.TeamID=Team.id)
+      AND Player.LastName = 'Smith'
+      GROUP BY GameDate
+    ) target,
+    (
+      SELECT ScoringEvent.id, GameDate, Player.TeamID, OpposingTeamID, ScoreType.Type, SUM(ScoreType.Points) AS sum
+      FROM ScoringEvent, Player, Team, ScoreType
+      WHERE
+      (ScoringEvent.PlayerID=Player.id AND Player.TeamID=Team.id)
+      AND ScoringEvent.ScoreTypeID=ScoreType.id
+      GROUP BY GameDate, TeamID, OpposingTeamID
+    ) source
+    WHERE
+    target.GameDate=source.GameDate AND target.TeamID=source.TeamID AND target.OpposingTeamID=source.OpposingTeamID
+  ) q1
+  LEFT JOIN
+  (
+    SELECT source.GameDate, source.TeamID, source.OpposingTeamID, source.sum
+    FROM
+    (
+      SELECT ScoringEvent.id, GameDate, Player.TeamID, OpposingTeamID
+      FROM ScoringEvent, Player, Team
+      WHERE
+      (ScoringEvent.PlayerID=Player.id AND Player.TeamID=Team.id)
+      AND Player.LastName = 'Smith'
+      GROUP BY GameDate
+    ) target,
+    (
+      SELECT ScoringEvent.id, GameDate, Player.TeamID, OpposingTeamID, ScoreType.Type, SUM(ScoreType.Points) AS sum
+      FROM ScoringEvent, Player, Team, ScoreType
+      WHERE
+      (ScoringEvent.PlayerID=Player.id AND Player.TeamID=Team.id)
+      AND ScoringEvent.ScoreTypeID=ScoreType.id
+      GROUP BY GameDate, TeamID, OpposingTeamID
+    ) source
+    WHERE
+    target.GameDate=source.GameDate AND target.OpposingTeamID=source.TeamID AND target.TeamID=source.OpposingTeamID
+  ) q2
+  ON
+  q1.GameDate=q2.GameDate AND q1.TeamID=q2.OpposingTeamID AND q1.OpposingTeamID=q2.TeamID
+  WHERE
+  q1.sum>IFNULL(q2.sum, 0)
+  AND q1.OpposingTeamID NOT IN (
+    SELECT q1.TeamID
+    FROM
+    (
+      SELECT source.GameDate, source.TeamID, source.OpposingTeamID, source.sum
+      FROM
+      (
+        SELECT ScoringEvent.id, GameDate, Player.TeamID, OpposingTeamID
+        FROM ScoringEvent, Player, Team
+        WHERE
+        (ScoringEvent.PlayerID=Player.id AND Player.TeamID=Team.id)
+        AND Player.LastName = 'Smith'
+        GROUP BY GameDate
+      ) target,
+      (
+        SELECT ScoringEvent.id, GameDate, Player.TeamID, OpposingTeamID, ScoreType.Type, SUM(ScoreType.Points) AS sum
+        FROM ScoringEvent, Player, Team, ScoreType
+        WHERE
+        (ScoringEvent.PlayerID=Player.id AND Player.TeamID=Team.id)
+        AND ScoringEvent.ScoreTypeID=ScoreType.id
+        GROUP BY GameDate, TeamID, OpposingTeamID
+      ) source
+      WHERE
+      target.GameDate=source.GameDate AND target.TeamID=source.TeamID AND target.OpposingTeamID=source.OpposingTeamID
+    ) q1
+    LEFT JOIN
+    (
+      SELECT source.GameDate, source.TeamID, source.OpposingTeamID, source.sum
+      FROM
+      (
+        SELECT ScoringEvent.id, GameDate, Player.TeamID, OpposingTeamID
+        FROM ScoringEvent, Player, Team
+        WHERE
+        (ScoringEvent.PlayerID=Player.id AND Player.TeamID=Team.id)
+        AND Player.LastName = 'Smith'
+        GROUP BY GameDate
+      ) target,
+      (
+        SELECT ScoringEvent.id, GameDate, Player.TeamID, OpposingTeamID, ScoreType.Type, SUM(ScoreType.Points) AS sum
+        FROM ScoringEvent, Player, Team, ScoreType
+        WHERE
+        (ScoringEvent.PlayerID=Player.id AND Player.TeamID=Team.id)
+        AND ScoringEvent.ScoreTypeID=ScoreType.id
+        GROUP BY GameDate, TeamID, OpposingTeamID
+      ) source
+      WHERE
+      target.GameDate=source.GameDate AND target.OpposingTeamID=source.TeamID AND target.TeamID=source.OpposingTeamID
+    ) q2
+    ON
+    q1.GameDate=q2.GameDate AND q1.TeamID=q2.OpposingTeamID AND q1.OpposingTeamID=q2.TeamID
+    WHERE
+    q1.sum>IFNULL(q2.sum, 0)
+  )
+) result,
+Team
+WHERE
+result.OpposingTeamID=Team.id
+
+
+
+
+
+
+
+
+
